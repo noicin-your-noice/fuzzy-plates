@@ -1,0 +1,27 @@
+{
+  "name": "fuzzy-plates",
+  "version": "1.0.0",
+  "description": "Look up license plates in a list, matching even when characters just look alike, like O/0, B/8, etc.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salt67/fuzzy-plates.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/salt67/fuzzy-plates/issues"
+  },
+  "homepage": "https://github.com/salt67/fuzzy-plates#readme",
+  "devDependencies": {
+    "vite": "^7.2.1",
+    "vite-plugin-singlefile": "^2.3.0"
+  }
+}

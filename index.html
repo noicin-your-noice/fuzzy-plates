@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fuzzy Plate Search</title>
+    <link rel="apple-touch-icon" href="/image.png">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <header id="searchBar">
+      <label for="searchInput">Search partial plates:</label>
+      <input id="searchInput"
+             type="search"
+             placeholder="Type to search..."
+             autocomplete="off"
+	     autocapitalize="off"
+	     spellcheck="false"
+             enterkeyhint="done"
+             autofocus />
+    </header>
+
+    <ul id="results"></ul>
+
+    <hr/>
+
+    <label for="plateInput">Plate list (plain or TSV):</label>
+    <textarea id="plateInput" spellcheck="false" placeholder="Copy plates from spreadsheet here. Columns containing 'plate', 'make', 'model', or 'color' will be recognized."></textarea>
+    <button id="loadBtn">Load Plates</button>
+    <button id="clearStoredPlates">Clear saved plates</button>
+    <div id="loadStatus"></div>
+
+    <script type="module" src="main.js"></script>
+    <!-- <pre id="testOutput"></pre> -->
+    <!-- <script type="module" src="tests.js"></script> -->
+  </body>
+</html>
