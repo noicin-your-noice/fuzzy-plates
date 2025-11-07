@@ -18,21 +18,83 @@ function normalizePlateKey(str) {
 }
 
 function extractVehicleSummary(rows) {
-  const vals = {color:new Set(),make:new Set(),model:new Set()};
+  const fieldValues = {
+    color: new Set(),
+    make: new Set(),
+    model: new Set()
+  };
 
-  for (const r of rows) {
-    for (const f of VEHICLE_FIELDS) {
-      const key = Object.keys(r.data).find(k => k.trim().toLowerCase() === f);
-      if (!key) continue;
-      const v = r.data[key]?.trim();
-      if (v) vals[f].add(v);
+  // Title-case helper
+  function titleCase(str) {
+    return str
+      .toLowerCase()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  for (const row of rows) {
+    for (const field of VEHICLE_FIELDS) {
+      const matchKey = Object.keys(row.data).find(
+        k => k.trim().toLowerCase() === field
+      );
+      if (!matchKey) continue;
+
+      const raw = row.data[matchKey] ?? "";
+      const trimmed = raw.trim();
+      if (!trimmed) continue;
+
+      const normalized = titleCase(trimmed);
+      fieldValues[field].add(normalized);
     }
   }
 
-  return [vals.color, vals.make, vals.model]
-    .map(set => set.size ? [...set].join("/") : "")
-    .filter(Boolean)
-    .join(" ");
+  const parts = [];
+
+  if (fieldValues.color.size > 0)
+    parts.push([...fieldValues.color].join("/"));
+
+  if (fieldValues.make.size > 0)
+    parts.push([...fieldValues.make].join("/"));
+
+  if (fieldValues.model.size > 0)
+    parts.push([...fieldValues.model].join("/"));
+
+  return parts.join(" ");
+}
+
+function choosePlateColumn(headers) {
+  const plateCols = headers
+    .map((h, i) => ({ h, i }))
+    .filter(({ h }) => /plate/i.test(h));
+
+  // If 0 → default to first column
+  if (plateCols.length === 0) {
+    return { index: 0, name: headers[0] || "(first column)" };
+  }
+
+  // If 1 → auto-select
+  if (plateCols.length === 1) {
+    return { index: plateCols[0].i, name: plateCols[0].h };
+  }
+
+  // If multiple → prompt user
+  const opts = plateCols
+    .map((p, idx) => `${idx + 1}. ${p.h}`)
+    .join("\n");
+
+  const answer = window.prompt(
+    `Multiple plate columns found. Which one should be used?\n\n${opts}\n\nEnter 1-${plateCols.length}:`,
+    "1"
+  );
+
+  if (answer === null) return { index: -1, name: null }; // cancelled
+
+  const n = parseInt(answer, 10);
+  if (!Number.isInteger(n) || n < 1 || n > plateCols.length) {
+    return { index: -1, name: null }; // invalid → abort
+  }
+
+  const pick = plateCols[n - 1];
+  return { index: pick.i, name: pick.h };
 }
 
 const defaultPlates = [
@@ -92,12 +154,10 @@ function parsePlain(text) {
   return map;
 }
 
-function parseTSV(text) {
+function parseTSV(text, idx = 0) {
   const lines = text.trim().split(/\r?\n/);
   const headers = lines[0].split(/\t/).map(h=>h.trim());
   const rows = lines.slice(1);
-  let idx = headers.findIndex(h=>/plate/i.test(h));
-  if (idx<0) idx = 0;
 
   const map = new Map();
   rows.forEach((line,i)=>{
@@ -116,19 +176,38 @@ function parseTSV(text) {
 }
 
 function loadUserPlates() {
-
-  // remove blank rows
+  // Remove blank rows for better user feedback
   let raw = plateInput.value;
   const cleaned = raw
     .split(/\r?\n/)
-    .filter(line => line.trim() !== "")   // keep rows with any real content
+    .map(line => line.trim())
+    .filter(line => line !== "")
     .join("\n");
+
   plateInput.value = cleaned;
   if (!cleaned) return;
 
-  const isTSV = cleaned.includes("\t");
-  userPlates = isTSV ? parseTSV(cleaned) : parsePlain(cleaned);
+  let plates;
 
+  if (cleaned.includes("\t")) {
+    // TSV path
+    const firstLine = cleaned.split(/\r?\n/)[0];
+    const headers = firstLine.split(/\t/).map(h => h.trim());
+
+    const { index: idx, name } = choosePlateColumn(headers);
+    if (idx < 0) {
+      loadStatus.textContent = "Import cancelled.";
+      return;
+    }
+
+    plates = parseTSV(cleaned, idx);
+
+  } else {
+    // Plain list path
+    plates = parsePlain(cleaned);
+  }
+
+  userPlates = plates;
   firstLoadedAt = Date.now();
   savePlates();
 
