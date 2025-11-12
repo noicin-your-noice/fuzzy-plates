@@ -25,11 +25,29 @@
 
     <hr/>
 
-    <label for="plateInput">Plate list (plain or TSV):</label>
-    <textarea id="plateInput" spellcheck="false" placeholder="Copy plates from spreadsheet here. Columns containing 'plate', 'make', 'model', or 'color' will be recognized."></textarea>
-    <button id="loadBtn">Load Plates</button>
-    <button id="clearStoredPlates">Clear saved plates</button>
-    <div id="loadStatus"></div>
+    <details id="copyPasteSection">
+      <summary class="loader">Manually enter license plate data</summary>
+      <div style="margin-top:8px;margin-bottom:3em;">
+	<label for="plateInput">Plate list (plain or TSV):</label>
+	<textarea id="plateInput" spellcheck="false" placeholder="Copy plates from spreadsheet here. Columns containing 'plate', 'make', 'model', or 'color' will be recognized."></textarea>
+	<button id="loadBtn">Load</button>
+      </div>
+    </details>
+
+    <details open id="ipfsSection">
+      <summary class="loader">Load data from IPFS</summary>
+      <div style="margin-top:8px;margin-bottom:2em;">
+	<label for="cidInput">CID:</label>
+	<input id="cidInput" type="text" spellcheck="false" placeholder="Enter the CID here..." autocomplete="off" style="width:100%;padding:8px;margin:6px 0;font-size:16px;">
+
+	<button id="loadFromCIDBtn">Load License Plates from IPFS</button>
+
+	<div id="cidStatus" style="font-size:14px;margin-top:6px;"></div>
+      </div>
+    </details>
+    
+    <button id="clearStoredPlates">Clear All</button>
+    <div id="loadStatus">Using sample data</div>
 
     <script type="module" src="main.js"></script>
     <!-- <pre id="testOutput"></pre> -->
